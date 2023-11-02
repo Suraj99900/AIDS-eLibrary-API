@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Models\AIDSUpload;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
@@ -14,7 +16,7 @@ class AIDSUploadController extends BaseController
         $this->validate($request, [
             'name' => 'required',
             'semester' => 'required',
-            'file' => 'required|file|max:100000',
+            'file' => 'required|file|max:100000', // Adjust the max file size if needed
             'user_name' => 'required',
             'file_type' => 'required',
         ]);
@@ -27,8 +29,14 @@ class AIDSUploadController extends BaseController
         $sUserName = $request->input('user_name', '');
 
         try {
-            // Get the uploaded file and store it in the 'uploads' directory
-            $file = $request->file('file')->store('uploads');
+            // Get the uploaded file
+            $uploadedFile = $request->file('file');
+            $originalFileName = $uploadedFile->getClientOriginalName();
+
+            $originalFileName = $sName . "_" . date('Y-m-d H:i:s'). "_" . $originalFileName;
+            // Move the file to the 'resources/uploads' directory
+            $destinationPath = resource_path('uploads');
+            $file = $uploadedFile->move($destinationPath, $originalFileName);
 
             $fileRecord = new AIDSUpload();
             $fileRecord->name = $sName;
@@ -37,9 +45,9 @@ class AIDSUploadController extends BaseController
             $fileRecord->user_name = $sUserName;
             $fileRecord->file_type = $iFileType;
             $fileRecord->description = $sDescription;
-            $fileRecord->file_name = $file;
-            $fileRecord->added_on = date("Y-m-d h:i:s");
-            $fileRecord->file_path = url('uploads/' . $file);
+            $fileRecord->file_name = $file->getFilename();
+            $fileRecord->added_on = date('Y-m-d H:i:s'); // Use Laravel's now() function to get the current date and time
+            $fileRecord->file_path = url('uploads/' . $originalFileName);
 
             if ($fileRecord->save()) {
                 return response()->json([
@@ -69,7 +77,8 @@ class AIDSUploadController extends BaseController
                 ->where('aids_staff_upload.deleted', 0)
                 ->where('aids_staff_upload.status', 1)
                 ->where('aids_student_semester.deleted', 0)
-                ->where('aids_student_semester.status', 1);
+                ->where('aids_student_semester.status', 1)
+                ->orderBy('added_on','DESC');
 
             if ($name !== '') {
                 $query->where('aids_staff_upload.name', 'like', '%' . $name . '%');
@@ -84,8 +93,11 @@ class AIDSUploadController extends BaseController
             }
 
             $result = $query->paginate($iLimit);
-
-            return $result;
+            return response()->json([
+                'message' => 'Ok',
+                'body' => $result,
+                'status_code' => 200
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Internal server error occurred.',
@@ -94,21 +106,38 @@ class AIDSUploadController extends BaseController
         }
     }
 
-    public function downloadFile($fileName)
+    public function downloadFile(Request $request)
     {
-        // Define the path to the directory where files are stored
-        $directory = resource_path('uploads'); // Adjust this to match your file storage directory
-
-        // Build the full path to the file
-        $filePath = $directory . '/' . $fileName;
-
-        if (file_exists($filePath)) {
-            return Response::download($filePath, $fileName);
-        } else {
+        try {
+            $this->validate($request, [
+                'url' => 'required',
+            ]);
+    
+            $fileName = $request->input('url', '');
+    
+            // Define the path to the directory where files are stored
+            $directory = resource_path('uploads/' . $fileName); // Adjust this to match your file storage directory
+    
+            if (File::exists($directory)) {
+                $response = new BinaryFileResponse($directory);
+    
+                // Set headers using the headers property
+                $response->headers->set('Content-Type', 'application/pdf');
+                $response->headers->set('Content-Disposition', 'attachment; filename="'.$fileName.'"');
+    
+                return $response;
+            } else {
+                return response()->json([
+                    'message' => 'File not found.',
+                    'status_code' => 404
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            // Handle exceptions here, e.g., log the error or return an error response
             return response()->json([
-                'message' => 'File not found.',
-                'status_code' => 404
-            ], 404);
+                'message' => 'An error occurred while processing the request.',
+                'status_code' => 500
+            ], 500);
         }
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -19,18 +20,17 @@ class CorsMiddleware
             'Access-Control-Allow-Methods'     => 'POST, GET, OPTIONS, PUT, DELETE',
             'Access-Control-Allow-Credentials' => 'true',
             'Access-Control-Max-Age'           => '86400',
-            'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With'
+            'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With',
+            'Access-Control-Expose-Headers'    => 'Content-Disposition', // Expose Content-Disposition header for file downloads
         ];
 
-        if ($request->isMethod('OPTIONS'))
-        {
+        if ($request->isMethod('OPTIONS')) {
             return response()->json('{"method":"OPTIONS"}', 200, $headers);
         }
 
         $response = $next($request);
-        foreach($headers as $key => $value)
-        {
-            $response->header($key, $value);
+        foreach ($headers as $key => $value) {
+            $response->headers->set($key, $value);
         }
 
         return $response;
