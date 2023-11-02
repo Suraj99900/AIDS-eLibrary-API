@@ -27,5 +27,6 @@ $router->group(['prefix' => 'api',['middleware' => 'ClientAuth' ]], function () 
     // upload Sestion API
     $router->post('upload', ['uses' => 'AIDSUploadController@addUploadData']);
     $router->get('fetch/book', ['uses' => 'AIDSUploadController@getUploadedBook']);
-    $router->get('download', ['uses' => 'AIDSUploadController@downloadFile']);
+    $router->post('download', ['uses' => 'AIDSUploadController@downloadFile']);
+
 });
