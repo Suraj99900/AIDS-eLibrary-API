@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Models\AIDSUpload;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 use Laravel\Lumen\Routing\Controller as BaseController;
@@ -66,13 +67,17 @@ class AIDSUploadController extends BaseController
     public function getUploadedBook(Request $request)
     {
         $name = $request->input('name', '');
-        $iSemester = $request->input('semester', '');
         $iSBN = $request->input('isbn', '');
+        $iTypeId = $request->input('typeId', '');
+        $iSemester = $request->input('semester', '');
+        $dFromDate = $request->input('fromDate', '');
+        $dToDate = $request->input('dToDate', '');
         $iLimit = $request->input('limit', 10);
         $iPage = $request->input('page', 1);
-
+        $dToDate = date("Y-m-d", strtotime($dToDate . "+1 day"));
         try {
-            $query = AIDSUpload::select('aids_student_semester.semester', 'aids_staff_upload.*')
+            DB::enableQueryLog();
+            $query = AIDSUpload::select('aids_student_semester.semester as sem', 'aids_staff_upload.*')
                 ->leftJoin('aids_student_semester', 'aids_staff_upload.semester', '=', 'aids_student_semester.id')
                 ->where('aids_staff_upload.deleted', 0)
                 ->where('aids_staff_upload.status', 1)
@@ -91,8 +96,15 @@ class AIDSUploadController extends BaseController
             if ($iSBN !== '') {
                 $query->where('aids_staff_upload.isbn', $iSBN);
             }
+            if ($iTypeId !== '' && $iTypeId > 0) {
+                $query->where('aids_staff_upload.file_type', $iTypeId);
+            }
+            if ($dFromDate !== '' && $dToDate !== '') {
+                $query->whereRaw('aids_staff_upload.added_on between ? AND ?', [$dFromDate, $dToDate]);
+            }
 
             $result = $query->paginate($iLimit);
+           
             return response()->json([
                 'message' => 'Ok',
                 'body' => $result,
