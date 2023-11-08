@@ -97,6 +97,8 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
+// for dubug laravel lumen query 
+$app->register(Barryvdh\Debugbar\LumenServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

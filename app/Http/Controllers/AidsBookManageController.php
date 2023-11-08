@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\AIDSBookManage;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -15,23 +16,48 @@ class AidsBookManageController extends Controller
     public function add(Request $request)
     {
         try {
-            $validatedData = $this->validate($request, [
-                'book_name' => 'required|string',
-                'isbn_no' => 'required|string',
-                'user_name' => 'nullable|string',
-            ]);
-            $validatedData['added_on'] = date('Y-m-d H:i:s');
-            $book = AIDSBookManage::create($validatedData);
+            $data = $request->input('bookData');
+            // Ensure that "books" key exists in the JSON data and it's an array
+            if (!isset($data['book']) || !is_array($data['book'])) {
+                return response()->json(['message' => 'Invalid data format', 'status_code' => 400], 400);
+            }
 
-            return response()->json(['message' => 'Book added successfully', 'status_code' => 200, 'book' => $book], 201);
-        } catch (QueryException $e) {
-            // Handle database query exceptions
-            return response()->json(['message' => 'Failed to add the book', 'status_code' => 500], 500);
+            // Initialize an array to store the inserted books
+            $insertedBooks = [];
+
+            // Loop through the array of books
+            foreach ($data['book'] as $book) {
+                // Validate each book's data
+                $validator = Validator::make($book, [
+                    'book_name' => 'required|string',
+                    'isbn_no' => 'required|string',
+                    'user_name' => 'nullable|string',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json(['message' => 'Validation failed', 'status_code' => 400], 400);
+                }
+
+                // Create an array with the validated book data
+                $bookData = [
+                    'book_name' => $book['book_name'],
+                    'isbn_no' => $book['isbn_no'],
+                    'user_name' => $book['user_name'] ?? null,
+                    'added_on' => date('Y-m-d H:i:s')
+                ];
+
+                // Insert the book into the database
+                $insertedBook = AIDSBookManage::create($bookData);
+                $insertedBooks[] = $insertedBook;
+            }
+
+            return response()->json(['message' => 'Books added successfully', 'status_code' => 201, 'books' => $insertedBooks], 201);
         } catch (\Exception $e) {
             // Handle other exceptions
             return response()->json(['message' => 'An error occurred', 'status_code' => 500], 500);
         }
     }
+
 
     public function update(Request $request, $id)
     {
@@ -53,8 +79,6 @@ class AidsBookManageController extends Controller
             // Handle database query exceptions
             return response()->json(['message' => 'Failed to update the book', 'status_code' => 500], 500);
         } catch (\Exception $e) {
-            echo $e;
-            die;
             // Handle other exceptions
             return response()->json(['message' => 'An error occurred', 'status_code' => 500], 500);
         }
@@ -62,14 +86,14 @@ class AidsBookManageController extends Controller
 
     public function fetch(Request $request)
     {
-        $sSearch = $request->input('search') ? $request->input('search'): '';
-        $iLimit = $request->input('limit') ? $request->input('limit'): 10;
+        $sSearch = $request->input('search') ? $request->input('search') : '';
+        $iLimit = $request->input('limit') ? $request->input('limit') : 10;
 
         try {
-            $query = AIDSBookManage::query()->where('status',1)->where('deleted',0);
+            $query = AIDSBookManage::query()->where('status', 1)->where('deleted', 0);
             // Apply filters if provided in the request
             if ($sSearch !== '') {
-                $query->orWhere('book_name', 'like', '%' . $sSearch . '%');
+                $query->Where('book_name', 'like', '%' . $sSearch . '%');
             }
 
             if ($sSearch !== '') {
