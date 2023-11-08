@@ -36,4 +36,12 @@ $router->group(['prefix' => 'api', ['middleware' => 'ClientAuth']], function () 
     $router->get('student-info', 'AIDSSturntInfoController@getStudentsInfo');
     $router->get('student-info/zprn', 'AIDSSturntInfoController@getStudentByNameZPRN');
     $router->delete('student-info/zprn', 'AIDSSturntInfoController@freezeStudent');
+
+
+    // Book Management Routes
+    $router->post('books', ['uses' => 'AidsBookManageController@add']);
+    $router->put('books/{id}', ['uses' => 'AidsBookManageController@update']);
+    $router->get('books', ['uses' => 'AidsBookManageController@fetch']);
+    $router->get('books/{id}', ['uses' => 'AidsBookManageController@fetchById']);
+    $router->delete('books/{id}', ['uses' => 'AidsBookManageController@delete']);
 });
