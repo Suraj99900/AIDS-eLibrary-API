@@ -47,15 +47,20 @@ class AIDSSturntInfoController extends Controller
     }
 
 
-    public function getStudentsInfo()
+    public function getStudentsInfo(Request $request)
     {
+        $sSearch = $request->input('search') ? $request->input('search') : '';
         try {
             // Fetch all student records with a left join on the Semester model
             $students = AIDSStudentInfo::leftJoin('aids_student_semester', 'aids_student_info.semester', '=', 'aids_student_semester.id')
                 ->select('aids_student_info.*', 'aids_student_semester.semester as semester_name')
-                ->orderBy('updated_at', 'DESC')
-                ->get();
+                ->orderBy('updated_at', 'DESC');
 
+            if ($sSearch !== '' && $sSearch !== null) {
+                $students->where('name', 'like', '%' . $sSearch . '%');
+                $students->orWhere('zprn', 'like', '%' . $sSearch . '%');
+            }
+            $students = $students->get();
             return response()->json(['students' => $students, 'status_code' => 200], 200);
         } catch (\Exception $e) {
             // Handle exceptions and return an error response

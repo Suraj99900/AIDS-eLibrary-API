@@ -22,6 +22,9 @@ $router->group(['prefix' => 'api', ['middleware' => 'ClientAuth']], function () 
     $router->post('register', ['uses' => 'AidsUserController@addUser']);
     $router->put('register', ['uses' => 'AidsUserController@updateUser']);
     $router->get('login', ['uses' => 'AidsUserController@loginUser']);
+    $router->get('user', ['uses' => 'AidsUserController@fetchUser']);
+    $router->put('change-pass/{id}', ['uses' => 'AidsUserController@updatePassword']);
+    $router->delete('user/{id}', ['uses' => 'AidsUserController@freezeOrUnFreezedById']);
     $router->get('semester', ['uses' => 'SemesterController@getAllSemester']);
 
     // upload Sestion API
@@ -44,4 +47,13 @@ $router->group(['prefix' => 'api', ['middleware' => 'ClientAuth']], function () 
     $router->get('books', ['uses' => 'AidsBookManageController@fetch']);
     $router->get('books/{id}', ['uses' => 'AidsBookManageController@fetchById']);
     $router->delete('books/{id}', ['uses' => 'AidsBookManageController@delete']);
+
+    // Book Issue Routes
+    $router->get('book-issues', ['uses' => 'AIDSBookIssueController@getAllBookIssues']);
+    $router->get('book-issues/{id}', ['uses' => 'AIDSBookIssueController@getBookIssueById']);
+    $router->post('book-issues', ['uses' => 'AIDSBookIssueController@addBookIssue']);
+    $router->put('book-issues/{id}', ['uses' => 'AIDSBookIssueController@updateBookIssueById']);
+    $router->put('book-return/{id}', ['uses' => 'AIDSBookIssueController@returnBookById']);
+    $router->delete('book-issues/{id}', ['uses' => 'AIDSBookIssueController@deleteBookIssueById']);
+
 });

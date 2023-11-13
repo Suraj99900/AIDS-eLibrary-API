@@ -87,7 +87,7 @@ class AidsBookManageController extends Controller
     public function fetch(Request $request)
     {
         $sSearch = $request->input('search') ? $request->input('search') : '';
-        $iLimit = $request->input('limit') ? $request->input('limit') : 10;
+        $iLimit = $request->input('limit') ? $request->input('limit') : 7;
 
         try {
             $query = AIDSBookManage::query()->where('status', 1)->where('deleted', 0);
