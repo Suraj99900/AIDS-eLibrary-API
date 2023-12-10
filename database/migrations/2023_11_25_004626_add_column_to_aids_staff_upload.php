@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('aids_staff_upload', function (Blueprint $table) {
-            $table->string("file_path")->after("file_name");
+            $table->date("submission_date")->after("file_type")->nullable()->index();
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('aids_staff_upload', function (Blueprint $table) {
-            $table->dropColumn("file_path");
+            $table->dropColumn("submission_date");
         });
     }
 };

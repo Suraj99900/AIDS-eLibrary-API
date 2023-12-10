@@ -30,6 +30,7 @@ $router->group(['prefix' => 'api', ['middleware' => 'ClientAuth']], function () 
     // upload Sestion API
     $router->post('upload', ['uses' => 'AIDSUploadController@addUploadData']);
     $router->get('fetch/book', ['uses' => 'AIDSUploadController@getUploadedBook']);
+    $router->delete('fetch/book/{id}', ['uses' => 'AIDSUploadController@delete']);
     $router->post('download', ['uses' => 'AIDSUploadController@downloadFile']);
 
     // student Info API

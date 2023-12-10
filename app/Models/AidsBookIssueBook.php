@@ -27,7 +27,7 @@ class AidsBookIssueBook extends Model
     }
     public function bookManage()
     {
-        return $this->belongsTo(AIDSBookManage::class, 'book_id', 'id');
+        return $this->belongsTo(AIDSUpload::class, 'book_id', 'id');
     }
 
     /**
@@ -91,8 +91,8 @@ class AidsBookIssueBook extends Model
                         $subQuery->where('name', 'like', "%$sSearch%");
                     })
                     ->orWhereHas('bookManage', function ($subQuery) use ($sSearch) {
-                        $subQuery->where('book_name', 'like', "%$sSearch%")
-                            ->orWhere('isbn_no', 'like', "%$sSearch%");
+                        $subQuery->where('name', 'like', "%$sSearch%")
+                            ->orWhere('isbn', 'like', "%$sSearch%");
                     });
             })->where('deleted', 0)->where('status', 1)
             ->when($sShow == 1, function ($query) {

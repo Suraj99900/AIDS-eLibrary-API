@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Models\AIDSUpload;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -28,6 +30,8 @@ class AIDSUploadController extends BaseController
         $sDescription = $request->input('description', '');
         $iFileType = $request->input('file_type', '');
         $sUserName = $request->input('user_name', '');
+        $dSubmissionDate = $request->input('submission_date', '');
+        $dSubmissionDate = $dSubmissionDate != '' ? date($dSubmissionDate): '';
 
         try {
             // Get the uploaded file
@@ -47,6 +51,7 @@ class AIDSUploadController extends BaseController
             $fileRecord->file_type = $iFileType;
             $fileRecord->description = $sDescription;
             $fileRecord->file_name = $file->getFilename();
+            $dSubmissionDate != '' ? $fileRecord->submission_date = $dSubmissionDate: '';
             $fileRecord->added_on = date('Y-m-d H:i:s'); // Use Laravel's now() function to get the current date and time
             $fileRecord->file_path = url('uploads/' . $originalFileName);
 
@@ -67,6 +72,7 @@ class AIDSUploadController extends BaseController
     public function getUploadedBook(Request $request)
     {
         $name = $request->input('name', '');
+        $search = $request->input('search', '');
         $iSBN = $request->input('isbn', '');
         $iTypeId = $request->input('typeId', '');
         $iSemester = $request->input('semester', '');
@@ -88,6 +94,9 @@ class AIDSUploadController extends BaseController
             if ($name !== '') {
                 $query->where('aids_staff_upload.name', 'like', '%' . $name . '%');
             }
+            if ($search !== '') {
+                $query->where('aids_staff_upload.name', 'like', '%' . $search . '%');
+            }
 
             if ($iSemester !== '') {
                 $query->where('aids_staff_upload.semester', $iSemester);
@@ -95,6 +104,9 @@ class AIDSUploadController extends BaseController
 
             if ($iSBN !== '') {
                 $query->where('aids_staff_upload.isbn', $iSBN);
+            }
+            if ($search !== '') {
+                $query->where('aids_staff_upload.isbn', $search);
             }
             if ($iTypeId !== '' && $iTypeId > 0) {
                 $query->where('aids_staff_upload.file_type', $iTypeId);
@@ -150,6 +162,24 @@ class AIDSUploadController extends BaseController
                 'message' => 'An error occurred while processing the request.',
                 'status_code' => 500
             ], 500);
+        }
+    }
+
+    public function delete($id)
+    {
+        try {
+            $book = AIDSUpload::findOrFail($id);
+            $book->update(['deleted' => 1]); // Set the 'deleted' flag to 1 (or any appropriate value) for soft deletion.
+            return response()->json(['message' => 'Book deleted successfully', 'status_code' => 200]);
+        } catch (ModelNotFoundException $e) {
+            // Handle "Model not found" exception (record not found)
+            return response()->json(['message' => 'Book not found', 'status_code' => 404], 404);
+        } catch (QueryException $e) {
+            // Handle database query exceptions
+            return response()->json(['message' => 'Failed to delete the book', 'status_code' => 500], 500);
+        } catch (\Exception $e) {
+            // Handle other exceptions
+            return response()->json(['message' => 'An error occurred', 'status_code' => 500], 500);
         }
     }
 }
