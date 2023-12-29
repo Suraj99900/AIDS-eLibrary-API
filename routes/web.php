@@ -2,6 +2,8 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use Symfony\Component\HttpKernel\Fragment\SsiFragmentRenderer;
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -56,5 +58,27 @@ $router->group(['prefix' => 'api', ['middleware' => 'ClientAuth']], function () 
     $router->put('book-issues/{id}', ['uses' => 'AIDSBookIssueController@updateBookIssueById']);
     $router->put('book-return/{id}', ['uses' => 'AIDSBookIssueController@returnBookById']);
     $router->delete('book-issues/{id}', ['uses' => 'AIDSBookIssueController@deleteBookIssueById']);
+
+
+    // master folder 
+    $router->get('folders', ['uses' => 'MasterFolderController@getAllFolders']);
+    $router->get('folders/{id}', ['uses' => 'MasterFolderController@getFolderById']);
+    $router->post('folders', ['uses' => 'MasterFolderController@createFolder']);
+    $router->put('folders/{id}', ['uses' => 'MasterFolderController@updateFolder']);
+    $router->put('folders/{id}/freeze', ['uses' => 'MasterFolderController@freezeFolder']);
+    $router->delete('folders/{id}', ['uses' => 'MasterFolderController@deleteFolder']);
+
+    // Subfolders Routes
+    $router->post('subfolders', ['uses' => 'SubFolderController@createSubFolder']);
+    $router->get('subfolders/{id}', ['uses' => 'SubFolderController@getSubFolderById']);
+    $router->get('subfolders/master/{masterFolderId}', ['uses' => 'SubFolderController@getSubFoldersByMasterFolderId']);
+    $router->get('subfolders', ['uses' => 'SubFolderController@getAllSubFolders']);
+    $router->delete('subfolders/{id}', ['uses' => 'SubFolderController@deleteSubFolder']);
+    $router->put('subfolders/{id}/freeze', ['uses' => 'SubFolderController@freezeSubFolder']);
+    $router->put('subfolders/{id}/unfreeze', ['uses' => 'SubFolderController@unfreezeSubFolder']);
+
+    $router->post('upload-data', ['uses' => 'UploadFileController@addUploadData']);
+    $router->get('upload-data', ['uses' => 'UploadFileController@getAllData']);
+    $router->post('download-file', ['uses' => 'UploadFileController@downloadFile']);
 
 });
