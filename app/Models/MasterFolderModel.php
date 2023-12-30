@@ -166,7 +166,7 @@ class MasterFolderModel extends Model
     public static function getDataTableData($start, $length, $orderColumn, $orderDirection, $searchValue, $limit)
     {
         try {
-            $query = self::where('deleted', 0)->where('status', 1);
+            $query = self::where('deleted', 0);
 
             // Apply search filter
             if (!empty($searchValue)) {

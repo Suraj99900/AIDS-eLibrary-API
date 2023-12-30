@@ -81,4 +81,6 @@ $router->group(['prefix' => 'api', ['middleware' => 'ClientAuth']], function () 
     $router->get('upload-data', ['uses' => 'UploadFileController@getAllData']);
     $router->post('download-file', ['uses' => 'UploadFileController@downloadFile']);
 
+    $router->post('export-students', ['uses' => 'ExcelController@exportStudents']);
+    $router->post('import-students', ['uses' => 'ExcelController@importStudents']);
 });

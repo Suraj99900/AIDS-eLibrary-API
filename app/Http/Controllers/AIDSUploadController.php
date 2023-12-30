@@ -106,7 +106,7 @@ class AIDSUploadController extends BaseController
                 $query->where('aids_staff_upload.isbn', $iSBN);
             }
             if ($search !== '') {
-                $query->where('aids_staff_upload.isbn', $search);
+                $query->orWhere('aids_staff_upload.isbn', $search);
             }
             if ($iTypeId !== '' && $iTypeId > 0) {
                 $query->where('aids_staff_upload.file_type', $iTypeId);

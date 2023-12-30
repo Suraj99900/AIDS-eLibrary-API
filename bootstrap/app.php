@@ -60,6 +60,7 @@ $app->singleton(
 */
 
 $app->configure('app');
+$app->configure('debugbar');
 
 /*
 |--------------------------------------------------------------------------
@@ -74,11 +75,11 @@ $app->configure('app');
 
 $app->middleware([
     App\Http\Middleware\CorsMiddleware::class,
-    // App\Http\Middleware\ClientAuthMiddleware::class
+    //App\Http\Middleware\ClientAuthMiddleware::class
 ]);
 
 $app->routeMiddleware([
-    'ClientAuth'=> App\Http\Middleware\ClientAuthMiddleware::class,
+    //'ClientAuth'=> App\Http\Middleware\ClientAuthMiddleware::class,
     'auth' => App\Http\Middleware\Authenticate::class,
 ]);
 
@@ -97,8 +98,9 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
-// for dubug laravel lumen query 
 $app->register(Barryvdh\Debugbar\LumenServiceProvider::class);
+$app->register(Maatwebsite\Excel\ExcelServiceProvider::class);
+
 
 /*
 |--------------------------------------------------------------------------

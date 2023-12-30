@@ -9,7 +9,10 @@
         "barryvdh/laravel-debugbar": "^3.9",
         "firebase/php-jwt": "^6.8",
         "flipbox/lumen-generator": "^9.2",
-        "laravel/lumen-framework": "^10.0"
+        "laravel/lumen-framework": "^10.0",
+        "league/flysystem": "^3.23",
+        "maatwebsite/excel": "^3.1",
+        "phpoffice/phpspreadsheet": "^1.29"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
