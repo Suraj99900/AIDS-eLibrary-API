@@ -38,10 +38,10 @@ class AIDSUploadController extends BaseController
             $uploadedFile = $request->file('file');
             $originalFileName = $uploadedFile->getClientOriginalName();
 
-            $originalFileName = $sName . "_" . date('Y-m-d H:i:s'). "_" . $originalFileName;
+            $originalFileName = $sName . "uploads" . date('Y-m-d_H-i-s') . "_" . $originalFileName;
             // Move the file to the 'resources/uploads' directory
             $destinationPath = resource_path('uploads');
-            $file = $uploadedFile->move($destinationPath, $originalFileName);
+            $file = move_uploaded_file($uploadedFile->getRealPath(), $destinationPath . '/' . $originalFileName);
 
             $fileRecord = new AIDSUpload();
             $fileRecord->name = $sName;
@@ -50,7 +50,7 @@ class AIDSUploadController extends BaseController
             $fileRecord->user_name = $sUserName;
             $fileRecord->file_type = $iFileType;
             $fileRecord->description = $sDescription;
-            $fileRecord->file_name = $file->getFilename();
+            $fileRecord->file_name = $originalFileName;
             $dSubmissionDate != '' ? $fileRecord->submission_date = $dSubmissionDate: '';
             $fileRecord->added_on = date('Y-m-d H:i:s'); // Use Laravel's now() function to get the current date and time
             $fileRecord->file_path = url('uploads/' . $originalFileName);

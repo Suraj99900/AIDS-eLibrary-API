@@ -32,27 +32,35 @@ class UploadFileController extends Controller
             $uploadedFile = $request->file('file');
             $originalFileName = $uploadedFile->getClientOriginalName();
 
-            $originalFileName = $sName . "_" . "class_room_" .  date('Y-m-d H:i:s') . "_" . $originalFileName;
+            $originalFileName = $sName . "_class_room_" . date('Y-m-d_H-i-s') . "_" . $originalFileName;
 
             // Move the file to the 'resources/uploads' directory
             $destinationPath = resource_path('classroom');
-            $file = $uploadedFile->move($destinationPath, $originalFileName);
+            if (move_uploaded_file($uploadedFile->getRealPath(), $destinationPath . '/' . $originalFileName)) {
+                // File moved successfully
+                $aData = UploadFile::UploadFileData(
+                    $sName,
+                    $sDescription,
+                    $iFileType,
+                    $sUserName,
+                    $iSubFolderId,
+                    url('classroom/' . $originalFileName),
+                    $originalFileName
+                );
 
-            $aData = UploadFile::UploadFileData(
-                $sName,
-                $sDescription,
-                $iFileType,
-                $sUserName,
-                $iSubFolderId,
-                url('classroom/' . $originalFileName),
-                $file->getFilename()
-            );
+                return response()->json([
+                    'message' => 'File uploaded successfully.',
+                    'status_code' => 200,
+                    'data' => $aData,
+                ], 200);
+            } else {
 
-            return response()->json([
-                'message' => 'File uploaded successfully.',
-                'status_code' => 200,
-                'data' => $aData,
-            ], 200);
+                return response()->json([
+                    'message' => 'Internal server error occurred.',
+                    'status_code' => 500,
+                    'error' => 'Error moving file. See logs for details.',
+                ], 500);
+            }
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Validation error.',
