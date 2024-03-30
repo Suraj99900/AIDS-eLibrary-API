@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/lxhorsyhgjpp/public_html/smartpoly.com
+    - export DEPLOYPATH=/home/lxhorsyhgjpp/public_html/smartpoly.lifehealerkavita.com
     - /bin/cp * $DEPLOYPATH
