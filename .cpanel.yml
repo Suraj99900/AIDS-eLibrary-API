@@ -1,5 +1,5 @@
 ---
 deployment:
-  task:
-    -export DEPLOYPATH = /home/lxhorsyhgjpp/public_html/smartpoly.com
-    -/bin/cp * $DEPLOYPATH
+  tasks:
+    - export DEPLOYPATH=/home/lxhorsyhgjpp/public_html/smartpoly.com
+    - /bin/cp * $DEPLOYPATH
